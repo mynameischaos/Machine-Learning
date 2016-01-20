@@ -1,5 +1,6 @@
 # encoding=utf8
 from math import log
+import operator
 
 
 # 计算给定数据集的香农熵
@@ -43,7 +44,7 @@ def splitDataSet(dataSet, axis, value):
 def chooseBestFeatureToSplit(dataSet):
     numFeatures = len(dataSet[0]) - 1
     baseEntropy = calcShannonEnt(dataSet)
-    bestInfoGain = 0.0;
+    bestInfoGain = 0.0
     bestFeature = -1
     for i in range(numFeatures):
         # 创建唯一的分类标签列表
@@ -56,9 +57,40 @@ def chooseBestFeatureToSplit(dataSet):
             prob = len(subDataSet) / float(len(dataSet))
             newEntropy += prob * calcShannonEnt(subDataSet)
         # 计算最好的信息增益
-            infoGain = baseEntropy - newEntropy
-        if (infoGain > bestInfoGain):
+        # 信息增益指信息划分前后的变化； 用香农熵来衡量信息的变化
+        # print newEntropy
+        infoGain = baseEntropy - newEntropy
+        if(infoGain > bestInfoGain):
             bestInfoGain = infoGain
             bestFeature = i
 
-     return bestFeature
+    return bestFeature
+# 多数表决
+def majorityCnt(classList):
+    classCount = {}
+    for vote in classList:
+        if vote not in classCount.key():  classCount[vote] = 0
+        classCount[vote] += 1
+    sortedClassCount = sorted(classCount.iteritems(),
+                              key=operator.itemgetter(1), reverse=True)
+    return sortedClassCount[0][0]
+
+# 创建树的函数代码
+def createTree(dataSet, labels):
+    classList = [example[-1] for example in dataSet]
+    if classList.count(classList[0]) == len(classList):
+        return classList[0]
+    if len(dataSet[0]) == 1:
+        return majorityCnt(classList)
+    bestFeat = chooseBestFeatureToSplit(dataSet)
+    bestFeatLabel = labels[bestFeat]
+    myTree = {bestFeatLabel: {}}
+    del(labels[bestFeat])
+    featValues = [example[bestFeat] for example in dataSet]
+    uniqueVals = set(featValues)
+    for value in uniqueVals:
+        subLabels = labels[:]
+        myTree[bestFeatLabel][value] = createTree(
+                splitDataSet(dataSet, bestFeat, value), subLabels)
+
+    return myTree
