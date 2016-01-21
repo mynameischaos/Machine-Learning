@@ -69,7 +69,8 @@ def chooseBestFeatureToSplit(dataSet):
 def majorityCnt(classList):
     classCount = {}
     for vote in classList:
-        if vote not in classCount.key():  classCount[vote] = 0
+        if vote not in classCount.keys():
+            classCount[vote] = 0
         classCount[vote] += 1
     sortedClassCount = sorted(classCount.iteritems(),
                               key=operator.itemgetter(1), reverse=True)
@@ -94,3 +95,28 @@ def createTree(dataSet, labels):
                 splitDataSet(dataSet, bestFeat, value), subLabels)
 
     return myTree
+
+#使用决策树的分类函数
+def classify(inputTree, featLabels, testVec):
+    firstStr = inputTree.keys()[0]
+    secondDict = inputTree[firstStr]
+    featIndex = featLabels.index(firstStr)
+    for key in secondDict.keys():
+        if testVec[featIndex] == key:
+            if type(secondDict[key]).__name__ == 'dict':
+                classLabel = classify(secondDict[key], featLabels, testVec)
+            else:
+                classLabel = secondDict[key]
+
+    return classLabel
+
+#使用pickle模块存储决策树
+def storeTree(inputTree, filename):
+    import pickle
+    fw = open(filename, 'w+')
+    pickle.dump(inputTree, fw)
+    fw.close()
+def grabTree(filename):
+    import pickle
+    fr = open(filename)
+    return pickle.load(fr)
