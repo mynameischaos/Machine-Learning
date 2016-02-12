@@ -86,6 +86,7 @@ def classifyVector(inX, weights):
         return 1.0
     else:
         return 0.0
+    
 def colicTest():
     frTrain = open('horseColicTraining.txt')
     frTest = open('horseColicTest.txt')
